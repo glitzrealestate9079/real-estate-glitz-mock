@@ -28,6 +28,7 @@ import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ReasonModal from "@/components/ui/ReasonModal";
 import Avatar from "@/components/ui/Avatar";
+import Tooltip from "@/components/ui/Tooltip";
 import UserFormModal from "@/components/users/UserFormModal";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { useQuickAddParam } from "@/hooks/useQuickAddParam";
@@ -40,6 +41,7 @@ import {
   updateUsersStatus,
 } from "@/redux/slices/usersSlice";
 import { formatCount, todayISO } from "@/utils/format";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 const ROLE_ICON = { Buyer: User, Owner: Home, Agent: Briefcase, Dealer: Store, Builder: Building2 };
 const VERIFIED_ROLES = ["Agent", "Dealer", "Builder"];
@@ -67,6 +69,7 @@ function needsVerificationReview(user) {
 
 export default function UsersPage() {
   const dispatch = useAppDispatch();
+  const logAction = useAuditLog();
   const items = useAppSelector((state) => state.users.items);
 
   const [roleFilter, setRoleFilter] = useState("all");
@@ -170,6 +173,7 @@ export default function UsersPage() {
         },
       })
     );
+    logAction(`Approved verification for ${user.name}`, "Users");
     toast.success(`${user.name}'s verification approved`);
   }
 
@@ -185,6 +189,7 @@ export default function UsersPage() {
         verificationRejectionReason: reason,
       })
     );
+    logAction(`Rejected verification for ${verifyRejectTarget.name}`, "Users");
     toast.success(`${verifyRejectTarget.name}'s verification rejected`);
     setVerifyRejectTarget(null);
   }
@@ -197,35 +202,41 @@ export default function UsersPage() {
         warnings: [...(warnTarget.warnings ?? []), { date: todayISO(), reason }],
       })
     );
+    logAction(`Warned ${warnTarget.name}`, "Users");
     toast.success(`${warnTarget.name} warned`);
     setWarnTarget(null);
   }
 
   function handleSuspend(reason) {
     dispatch(updateUserStatus({ id: suspendTarget.id, status: "suspended", suspensionReason: reason }));
+    logAction(`Suspended ${suspendTarget.name}`, "Users");
     toast.success(`${suspendTarget.name} suspended`);
     setSuspendTarget(null);
   }
 
   function handleBan(reason) {
     dispatch(updateUserStatus({ id: banTarget.id, status: "banned", banReason: reason }));
+    logAction(`Banned ${banTarget.name}`, "Users");
     toast.success(`${banTarget.name} banned`);
     setBanTarget(null);
   }
 
   function handleReactivate(user) {
     dispatch(updateUserStatus({ id: user.id, status: "active", suspensionReason: null, banReason: null }));
+    logAction(`Reactivated ${user.name}`, "Users");
     toast.success(`${user.name} reactivated`);
   }
 
   function handleDelete() {
     dispatch(removeUser(deleteTarget.id));
+    logAction(`Deleted user ${deleteTarget.name}`, "Users");
     toast.success(`${deleteTarget.name} deleted`);
     setDeleteTarget(null);
   }
 
   function handleBulkSuspend(reason) {
     dispatch(updateUsersStatus({ ids: selectedIds, status: "suspended", suspensionReason: reason }));
+    logAction(`Bulk-suspended ${selectedIds.length} users`, "Users");
     toast.success(`${selectedIds.length} users suspended`);
     setSelectedIds([]);
     setBulkSuspendOpen(false);
@@ -233,6 +244,7 @@ export default function UsersPage() {
 
   function handleBulkBan(reason) {
     dispatch(updateUsersStatus({ ids: selectedIds, status: "banned", banReason: reason }));
+    logAction(`Bulk-banned ${selectedIds.length} users`, "Users");
     toast.success(`${selectedIds.length} users banned`);
     setSelectedIds([]);
     setBulkBanOpen(false);
@@ -387,54 +399,66 @@ export default function UsersPage() {
         emptyDescription="Try a different role or status."
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => setViewingUser(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              aria-label="View user"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit user"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.status === "active" && (
+            <Tooltip content="View user" side="top">
               <button
-                onClick={() => setWarnTarget(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
-                aria-label="Warn user"
+                onClick={() => setViewingUser(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
+                aria-label="View user"
               >
-                <AlertTriangle className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            <Tooltip content="Edit user" side="top">
+              <button
+                onClick={() => openEdit(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit user"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            {row.status === "active" && (
+              <Tooltip content="Warn user" side="top">
+                <button
+                  onClick={() => setWarnTarget(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
+                  aria-label="Warn user"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
             {(row.status === "active" || row.status === "warned") && (
-              <button
-                onClick={() => setSuspendTarget(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                aria-label="Suspend user"
-              >
-                <Ban className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Suspend user" side="top">
+                <button
+                  onClick={() => setSuspendTarget(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                  aria-label="Suspend user"
+                >
+                  <Ban className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
             {(row.status === "suspended" || row.status === "banned") && (
-              <button
-                onClick={() => handleReactivate(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                aria-label="Reactivate user"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Reactivate user" side="top">
+                <button
+                  onClick={() => handleReactivate(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                  aria-label="Reactivate user"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete user"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete user" side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete user"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

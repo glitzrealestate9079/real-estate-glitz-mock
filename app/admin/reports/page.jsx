@@ -32,6 +32,7 @@ import StatCard from "@/components/ui/StatCard";
 import Table from "@/components/ui/Table";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ReportFormModal from "@/components/reports/ReportFormModal";
+import UITooltip from "@/components/ui/Tooltip";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addSavedReport, removeSavedReport, removeSavedReports, updateSavedReport } from "@/redux/slices/reportsSlice";
 import { cityOf, formatCount, formatINR, todayISO } from "@/utils/format";
@@ -389,15 +390,21 @@ export default function ReportsPage() {
           emptyTitle="No saved reports yet"
           rowActions={(row) => (
             <>
-              <button onClick={() => openEdit(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit report">
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => handleExportSavedReport(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Export report">
-                <FileDown className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete report">
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              <UITooltip content="Edit report" side="top">
+                <button onClick={() => openEdit(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit report">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </UITooltip>
+              <UITooltip content="Export report" side="top">
+                <button onClick={() => handleExportSavedReport(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Export report">
+                  <FileDown className="h-3.5 w-3.5" />
+                </button>
+              </UITooltip>
+              <UITooltip content="Delete report" side="top">
+                <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete report">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </UITooltip>
             </>
           )}
         />

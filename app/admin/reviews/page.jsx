@@ -5,6 +5,7 @@ import { Check, Eye, Flag, Pencil, Plus, Star, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/utils/cn";
 import Card from "@/components/ui/Card";
+import Tooltip from "@/components/ui/Tooltip";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Table from "@/components/ui/Table";
@@ -23,6 +24,7 @@ import {
   updateReviewsStatus,
 } from "@/redux/slices/reviewsSlice";
 import { todayISO } from "@/utils/format";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 const STATUS_BADGE = {
   pending: { variant: "warning", label: "Pending" },
@@ -43,6 +45,7 @@ function Stars({ rating, className }) {
 
 export default function ReviewsPage() {
   const dispatch = useAppDispatch();
+  const logAction = useAuditLog();
   const items = useAppSelector((state) => state.reviews.items);
 
   const [statusFilter, setStatusFilter] = useState("all");
@@ -99,17 +102,20 @@ export default function ReviewsPage() {
 
   function handleApprove(review) {
     dispatch(updateReviewStatus({ id: review.id, status: "approved" }));
+    logAction(`Approved review ${review.id}`, "Reviews");
     toast.success(`Review ${review.id} approved`);
   }
 
   function handleReject(reason) {
     dispatch(updateReviewStatus({ id: rejectTarget.id, status: "rejected", moderationReason: reason }));
+    logAction(`Rejected review ${rejectTarget.id}`, "Reviews");
     toast.success(`Review ${rejectTarget.id} rejected`);
     setRejectTarget(null);
   }
 
   function handleFlag(reason) {
     dispatch(updateReviewStatus({ id: flagTarget.id, status: "flagged", moderationReason: reason }));
+    logAction(`Flagged review ${flagTarget.id}`, "Reviews");
     toast.success(`Review ${flagTarget.id} flagged for review`);
     setFlagTarget(null);
   }
@@ -239,25 +245,35 @@ export default function ReviewsPage() {
         emptyTitle="No reviews match these filters"
         rowActions={(row) => (
           <>
-            <button onClick={() => setViewingReviewId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View review">
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => openEdit(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit review">
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View review" side="top">
+              <button onClick={() => setViewingReviewId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View review">
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit review" side="top">
+              <button onClick={() => openEdit(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit review">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
             {row.status === "pending" && (
               <>
-                <button onClick={() => handleApprove(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success" aria-label="Approve review">
-                  <Check className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={() => setRejectTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Reject review">
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip content="Approve review" side="top">
+                  <button onClick={() => handleApprove(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success" aria-label="Approve review">
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Reject review" side="top">
+                  <button onClick={() => setRejectTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Reject review">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               </>
             )}
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete review">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete review" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete review">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

@@ -32,6 +32,7 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import AdminUserFormModal from "@/components/settings/AdminUserFormModal";
 import TemplateFormModal from "@/components/settings/TemplateFormModal";
 import ApiKeyFormModal from "@/components/settings/ApiKeyFormModal";
+import Tooltip from "@/components/ui/Tooltip";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   addAdminUser,
@@ -227,39 +228,45 @@ function AdminUsersTab() {
         emptyTitle="No admin users yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit admin"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggle(row)}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                row.status === "active" ? "hover:text-danger" : "hover:text-success"
-              )}
-              aria-label={row.status === "active" ? "Suspend admin" : "Activate admin"}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                if (row.email === currentUser?.email) {
-                  toast.error("You can't remove your own account");
-                  return;
-                }
-                setDeleteTarget(row);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete admin"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Edit admin" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit admin"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.status === "active" ? "Suspend admin" : "Activate admin"} side="top">
+              <button
+                onClick={() => handleToggle(row)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                  row.status === "active" ? "hover:text-danger" : "hover:text-success"
+                )}
+                aria-label={row.status === "active" ? "Suspend admin" : "Activate admin"}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete admin" side="top">
+              <button
+                onClick={() => {
+                  if (row.email === currentUser?.email) {
+                    toast.error("You can't remove your own account");
+                    return;
+                  }
+                  setDeleteTarget(row);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete admin"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -382,29 +389,35 @@ function TemplatesTab() {
         emptyTitle="No notification templates yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit template"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggle(row)}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                row.status === "active" ? "hover:text-danger" : "hover:text-success"
-              )}
-              aria-label={row.status === "active" ? "Deactivate template" : "Activate template"}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete template">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Edit template" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit template"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.status === "active" ? "Deactivate template" : "Activate template"} side="top">
+              <button
+                onClick={() => handleToggle(row)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                  row.status === "active" ? "hover:text-danger" : "hover:text-success"
+                )}
+                aria-label={row.status === "active" ? "Deactivate template" : "Activate template"}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete template" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete template">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -524,24 +537,30 @@ function ApiKeysTab() {
         emptyTitle="No API keys yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit key"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.status === "active" && (
-              <button onClick={() => setRevokeTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Revoke key">
-                <ShieldOff className="h-3.5 w-3.5" />
+            <Tooltip content="Edit key" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit key"
+              >
+                <Pencil className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            {row.status === "active" && (
+              <Tooltip content="Revoke key" side="top">
+                <button onClick={() => setRevokeTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Revoke key">
+                  <ShieldOff className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete key">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete key" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete key">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -572,9 +591,11 @@ function ApiKeysTab() {
             <p className="text-sm text-gray-600 dark:text-gray-400">{revealedKey.name}</p>
             <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
               <code className="flex-1 overflow-x-auto whitespace-nowrap font-mono text-xs text-gray-800 dark:text-gray-200">{revealedKey.fullKey}</code>
-              <button onClick={copyKey} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-200 hover:text-primary-600 dark:hover:bg-gray-700" aria-label="Copy key">
-                <Copy className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Copy key" side="top">
+                <button onClick={copyKey} className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-gray-200 hover:text-primary-600 dark:hover:bg-gray-700" aria-label="Copy key">
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
             <Button className="w-full" onClick={() => setRevealedKey(null)}>
               Done
@@ -646,9 +667,11 @@ function MasterDataTab() {
             >
               <Building2 className="h-3.5 w-3.5" />
               {type}
-              <button onClick={() => handleRemoveType(type)} className="ml-0.5 rounded-full p-0.5 hover:bg-primary-100 dark:hover:bg-primary-500/20" aria-label={`Remove ${type}`}>
-                <X className="h-3 w-3" />
-              </button>
+              <Tooltip content={`Remove ${type}`} side="top">
+                <button onClick={() => handleRemoveType(type)} className="ml-0.5 rounded-full p-0.5 hover:bg-primary-100 dark:hover:bg-primary-500/20" aria-label={`Remove ${type}`}>
+                  <X className="h-3 w-3" />
+                </button>
+              </Tooltip>
             </span>
           ))}
         </div>
@@ -669,9 +692,11 @@ function MasterDataTab() {
             >
               <MapPin className="h-3.5 w-3.5" />
               {city}
-              <button onClick={() => handleRemoveCity(city)} className="ml-0.5 rounded-full p-0.5 hover:bg-accent-100 dark:hover:bg-accent-500/20" aria-label={`Remove ${city}`}>
-                <X className="h-3 w-3" />
-              </button>
+              <Tooltip content={`Remove ${city}`} side="top">
+                <button onClick={() => handleRemoveCity(city)} className="ml-0.5 rounded-full p-0.5 hover:bg-accent-100 dark:hover:bg-accent-500/20" aria-label={`Remove ${city}`}>
+                  <X className="h-3 w-3" />
+                </button>
+              </Tooltip>
             </span>
           ))}
         </div>

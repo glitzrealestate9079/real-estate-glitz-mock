@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { Briefcase, Building2, CalendarClock, MessagesSquare, Plus, UserPlus } from "lucide-react";
 import Dropdown from "@/components/ui/Dropdown";
 
-// Each target page reads `?new=1` on mount and auto-opens its Add form, so this is a genuine
-// shortcut rather than just a bookmark to the module's list page.
+// Each target page (other than Listings, which is its own dedicated route now that its form
+// lives on a full page rather than a modal) reads `?new=1` on mount and auto-opens its Add form,
+// so this is a genuine shortcut rather than just a bookmark to the module's list page.
 const QUICK_ADD_ITEMS = [
-  { label: "Add Property", href: "/admin/listings?new=1", icon: Building2 },
+  { label: "Add Property", href: "/admin/listings/new", icon: Building2 },
   { label: "Add Lead", href: "/admin/leads?new=1", icon: MessagesSquare },
   { label: "Schedule Site Visit", href: "/admin/site-visits?new=1", icon: CalendarClock },
   { label: "Add Agent", href: "/admin/agents?new=1", icon: Briefcase },

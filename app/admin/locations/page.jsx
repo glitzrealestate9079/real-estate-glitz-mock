@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Tooltip from "@/components/ui/Tooltip";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -211,27 +212,33 @@ export default function LocationsPage() {
         emptyDescription={`Add the first ${TYPE_LABEL[currentType]?.toLowerCase()} under ${currentParent ? currentParent.name : "the platform"}.`}
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label={`Edit ${row.name}`}
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggleStatus(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
-              aria-label={`Toggle status for ${row.name}`}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label={`Delete ${row.name}`}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content={`Edit ${row.name}`} side="top">
+              <button
+                onClick={() => openEdit(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label={`Edit ${row.name}`}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={`Toggle status for ${row.name}`} side="top">
+              <button
+                onClick={() => handleToggleStatus(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
+                aria-label={`Toggle status for ${row.name}`}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={`Delete ${row.name}`} side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label={`Delete ${row.name}`}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

@@ -11,6 +11,7 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import StatCard from "@/components/ui/StatCard";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Tooltip from "@/components/ui/Tooltip";
 import SavedSearchFormModal from "@/components/saved-searches/SavedSearchFormModal";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -204,34 +205,42 @@ export default function SavedSearchesPage() {
         emptyDescription="Try a different status or city."
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => setViewingId(row.id)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              aria-label="View saved search"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit saved search"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggleStatus(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
-              aria-label={row.status === "active" ? "Pause alerts" : "Resume alerts"}
-            >
-              {row.status === "active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            </button>
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete saved search"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View saved search" side="top">
+              <button
+                onClick={() => setViewingId(row.id)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
+                aria-label="View saved search"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit saved search" side="top">
+              <button
+                onClick={() => openEdit(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit saved search"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.status === "active" ? "Pause alerts" : "Resume alerts"} side="top">
+              <button
+                onClick={() => handleToggleStatus(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600"
+                aria-label={row.status === "active" ? "Pause alerts" : "Resume alerts"}
+              >
+                {row.status === "active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete saved search" side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete saved search"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

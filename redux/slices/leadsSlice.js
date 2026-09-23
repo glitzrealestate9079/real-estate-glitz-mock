@@ -20,6 +20,7 @@ const initialItems = [
     assignedTo: "agent_ravi",
     createdDate: "2026-09-20",
     lastActivity: "2026-09-20",
+    nextFollowUpDate: "2026-09-24",
   },
   {
     id: "LED-30002",
@@ -36,6 +37,7 @@ const initialItems = [
     assignedTo: "agent_ravi",
     createdDate: "2026-09-19",
     lastActivity: "2026-09-20",
+    nextFollowUpDate: "2026-09-22",
   },
   {
     id: "LED-30003",
@@ -52,6 +54,7 @@ const initialItems = [
     assignedTo: "dealer_shah",
     createdDate: "2026-09-18",
     lastActivity: "2026-09-19",
+    nextFollowUpDate: "2026-09-25",
   },
   {
     id: "LED-30004",
@@ -68,6 +71,7 @@ const initialItems = [
     assignedTo: "builder_cyberhub",
     createdDate: "2026-09-10",
     lastActivity: "2026-09-16",
+    nextFollowUpDate: null,
   },
   {
     id: "LED-30005",
@@ -84,6 +88,7 @@ const initialItems = [
     assignedTo: "owner_zenith",
     createdDate: "2026-09-21",
     lastActivity: "2026-09-21",
+    nextFollowUpDate: "2026-09-23",
   },
   {
     id: "LED-30006",
@@ -100,6 +105,7 @@ const initialItems = [
     assignedTo: "owner_priya",
     createdDate: "2026-09-05",
     lastActivity: "2026-09-05",
+    nextFollowUpDate: null,
   },
   {
     id: "LED-30007",
@@ -116,6 +122,7 @@ const initialItems = [
     assignedTo: "agent_ravi",
     createdDate: "2026-09-15",
     lastActivity: "2026-09-17",
+    nextFollowUpDate: "2026-09-20",
   },
   {
     id: "LED-30008",
@@ -132,6 +139,7 @@ const initialItems = [
     assignedTo: "builder_cyberhub",
     createdDate: "2026-09-20",
     lastActivity: "2026-09-20",
+    nextFollowUpDate: "2026-09-26",
   },
   {
     id: "LED-30009",
@@ -148,6 +156,7 @@ const initialItems = [
     assignedTo: "dealer_shah",
     createdDate: "2026-09-01",
     lastActivity: "2026-09-01",
+    nextFollowUpDate: null,
   },
   {
     id: "LED-30010",
@@ -164,6 +173,7 @@ const initialItems = [
     assignedTo: "owner_meridian",
     createdDate: "2026-09-19",
     lastActivity: "2026-09-20",
+    nextFollowUpDate: "2026-09-24",
   },
   {
     id: "LED-30011",
@@ -180,6 +190,7 @@ const initialItems = [
     assignedTo: "agent_desai",
     createdDate: "2026-09-21",
     lastActivity: "2026-09-21",
+    nextFollowUpDate: "2026-09-25",
   },
   {
     id: "LED-30012",
@@ -196,6 +207,7 @@ const initialItems = [
     assignedTo: "owner_kulkarni",
     createdDate: "2026-09-03",
     lastActivity: "2026-09-08",
+    nextFollowUpDate: null,
   },
   {
     id: "LED-30013",
@@ -212,6 +224,7 @@ const initialItems = [
     assignedTo: "agent_ravi",
     createdDate: "2026-09-17",
     lastActivity: "2026-09-18",
+    nextFollowUpDate: "2026-09-21",
   },
   {
     id: "LED-30014",
@@ -228,6 +241,7 @@ const initialItems = [
     assignedTo: "builder_cyberhub",
     createdDate: "2026-09-21",
     lastActivity: "2026-09-21",
+    nextFollowUpDate: "2026-09-24",
   },
 ];
 

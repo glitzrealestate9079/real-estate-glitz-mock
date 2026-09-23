@@ -19,6 +19,7 @@ import siteVisitsReducer from "./slices/siteVisitsSlice";
 import locationsReducer from "./slices/locationsSlice";
 import agentsReducer from "./slices/agentsSlice";
 import savedSearchesReducer from "./slices/savedSearchesSlice";
+import reportedListingsReducer from "./slices/reportedListingsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -41,5 +42,6 @@ export const store = configureStore({
     locations: locationsReducer,
     agents: agentsReducer,
     savedSearches: savedSearchesReducer,
+    reportedListings: reportedListingsReducer,
   },
 });

@@ -106,6 +106,12 @@ const settingsSlice = createSlice({
     removeCity(state, action) {
       state.cities = state.cities.filter((c) => c !== action.payload);
     },
+
+    // The only writer of `auditLog` — every other module dispatches this (via the `useAuditLog`
+    // hook) instead of touching the array directly, so entries always land newest-first here.
+    logAuditEntry(state, action) {
+      state.auditLog.unshift({ id: `LOG-${Math.floor(1000 + Math.random() * 8999)}`, ...action.payload });
+    },
   },
 });
 
@@ -123,6 +129,7 @@ export const {
   removePropertyType,
   addCity,
   removeCity,
+  logAuditEntry,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

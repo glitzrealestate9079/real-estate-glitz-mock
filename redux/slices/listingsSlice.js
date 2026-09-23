@@ -244,6 +244,10 @@ const initialItemsWithLifecycle = initialItems.map((item, i) => ({
   reraVerified: ["verified"].includes(item.admin?.reraLicense) || ["verified"].includes(item.admin?.reraRegistration) || item.admin?.ownershipDoc === "verified",
   autoRenew: i % 3 !== 2,
   expiryDate: addDays(item.submittedDate, item.status === "approved" ? 60 : 30),
+  // When the owner/agent last confirmed the listing is still available — defaults to the
+  // submitted date. PRP-12390 is backdated so at least one approved listing demonstrates the
+  // "stale, please reconfirm" state out of the box.
+  lastConfirmedDate: item.id === "PRP-12390" ? "2026-08-10" : item.submittedDate,
   image: TYPE_IMAGE[item.propertyType] ?? null,
   views: 180 + i * 97 + (item.status === "approved" ? 420 : 0),
   enquiries: 4 + (i % 7) + (item.status === "approved" ? 12 : 0),

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/utils/cn";
+import Tooltip from "@/components/ui/Tooltip";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -232,27 +233,35 @@ function TransactionsTab() {
         emptyTitle="No transactions match this filter"
         rowActions={(row) => (
           <>
-            <button onClick={() => setViewing(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View transaction">
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit transaction"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.status === "success" && (
-              <button onClick={() => setRefundTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600" aria-label="Refund transaction">
-                <RotateCcw className="h-3.5 w-3.5" />
+            <Tooltip content="View transaction" side="top">
+              <button onClick={() => setViewing(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View transaction">
+                <Eye className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            <Tooltip content="Edit transaction" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit transaction"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            {row.status === "success" && (
+              <Tooltip content="Refund transaction" side="top">
+                <button onClick={() => setRefundTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-warning/10 hover:text-amber-600" aria-label="Refund transaction">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete transaction">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete transaction" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete transaction">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -403,29 +412,35 @@ function PlansTab() {
         emptyTitle="No pricing plans yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit plan"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggleActive(row)}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                row.active ? "hover:text-danger" : "hover:text-success"
-              )}
-              aria-label={row.active ? "Deactivate plan" : "Activate plan"}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete plan">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Edit plan" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit plan"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.active ? "Deactivate plan" : "Activate plan"} side="top">
+              <button
+                onClick={() => handleToggleActive(row)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                  row.active ? "hover:text-danger" : "hover:text-success"
+                )}
+                aria-label={row.active ? "Deactivate plan" : "Activate plan"}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete plan" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete plan">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -539,31 +554,37 @@ function CouponsTab() {
         emptyTitle="No coupons yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit coupon"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.status !== "expired" && (
+            <Tooltip content="Edit coupon" side="top">
               <button
-                onClick={() => handleToggle(row)}
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                  row.status === "active" ? "hover:text-danger" : "hover:text-success"
-                )}
-                aria-label={row.status === "active" ? "Disable coupon" : "Activate coupon"}
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit coupon"
               >
-                <Power className="h-3.5 w-3.5" />
+                <Pencil className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            {row.status !== "expired" && (
+              <Tooltip content={row.status === "active" ? "Disable coupon" : "Activate coupon"} side="top">
+                <button
+                  onClick={() => handleToggle(row)}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                    row.status === "active" ? "hover:text-danger" : "hover:text-success"
+                  )}
+                  aria-label={row.status === "active" ? "Disable coupon" : "Activate coupon"}
+                >
+                  <Power className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete coupon">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete coupon" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete coupon">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

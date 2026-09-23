@@ -40,6 +40,7 @@ const schema = yup.object({
   status: yup.string().oneOf(STATUSES).required("Select a status"),
   message: yup.string().trim().required("Enquiry message is required").min(5, "Message is too short"),
   assignedTo: yup.string().trim().required("Assign this lead to a username"),
+  nextFollowUpDate: yup.string().trim().notRequired(),
 });
 
 const DEFAULT_VALUES = {
@@ -52,6 +53,7 @@ const DEFAULT_VALUES = {
   status: "new",
   message: "",
   assignedTo: "",
+  nextFollowUpDate: "",
 };
 
 /** Add/Edit modal for a lead — links to a real listing from the Listings module (Section 4.4). */
@@ -79,6 +81,7 @@ export default function LeadFormModal({ isOpen, onClose, onSubmit, initialData, 
               status: initialData.status,
               message: initialData.message,
               assignedTo: initialData.assignedTo,
+              nextFollowUpDate: initialData.nextFollowUpDate ?? "",
             }
           : DEFAULT_VALUES
       );
@@ -142,7 +145,13 @@ export default function LeadFormModal({ isOpen, onClose, onSubmit, initialData, 
             error={errors.assignedTo?.message}
             {...register("assignedTo")}
             placeholder="e.g. agent_ravi"
-            containerClassName="sm:col-span-2"
+          />
+          <Input
+            label="Next Follow-up (optional)"
+            type="date"
+            error={errors.nextFollowUpDate?.message}
+            {...register("nextFollowUpDate")}
+            hint="Leave blank once the lead is converted or lost"
           />
         </div>
 

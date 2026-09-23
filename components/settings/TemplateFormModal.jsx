@@ -12,7 +12,7 @@ import Textarea from "@/components/ui/Textarea";
 
 const CHANNELS = ["Email", "SMS", "WhatsApp", "Push"];
 
-// `subject` only applies to Email — same when($channel) resolver pattern as ListingFormModal.
+// `subject` only applies to Email — same when($channel) resolver pattern as ListingForm.
 const schema = yup.object({
   name: yup.string().trim().required("Template name is required"),
   channel: yup.string().oneOf(CHANNELS).required("Select a channel"),

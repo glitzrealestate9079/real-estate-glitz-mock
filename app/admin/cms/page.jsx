@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, FileText, Image as ImageIcon, Layers, Pencil, Plus, Power, Trash2 } from "lucide-react";
+import { Eye, FileText, HelpCircle, Image as ImageIcon, Layers, Pencil, Plus, Power, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/utils/cn";
 import Card from "@/components/ui/Card";
@@ -13,17 +13,23 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ArticleFormModal from "@/components/cms/ArticleFormModal";
 import StaticPageFormModal from "@/components/cms/StaticPageFormModal";
 import BannerFormModal from "@/components/cms/BannerFormModal";
+import FAQFormModal from "@/components/cms/FAQFormModal";
+import Tooltip from "@/components/ui/Tooltip";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   addArticle,
   addBanner,
+  addFaq,
   addStaticPage,
   removeArticle,
   removeArticles,
   removeBanner,
+  removeFaq,
+  removeFaqs,
   removeStaticPage,
   updateArticle,
   updateBanner,
+  updateFaq,
   updateStaticPage,
 } from "@/redux/slices/cmsSlice";
 import { formatCount, todayISO } from "@/utils/format";
@@ -32,7 +38,13 @@ const TABS = [
   { key: "articles", label: "Blog / News", icon: FileText },
   { key: "pages", label: "Static Pages", icon: Layers },
   { key: "banners", label: "Banners", icon: ImageIcon },
+  { key: "faqs", label: "FAQ", icon: HelpCircle },
 ];
+
+const FAQ_STATUS_BADGE = {
+  draft: { variant: "neutral", label: "Draft" },
+  published: { variant: "success", label: "Published" },
+};
 
 const ARTICLE_STATUS_BADGE = {
   draft: { variant: "neutral", label: "Draft" },
@@ -99,6 +111,7 @@ export default function CmsPage() {
       {tab === "articles" && <ArticlesTab />}
       {tab === "pages" && <PagesTab />}
       {tab === "banners" && <BannersTab />}
+      {tab === "faqs" && <FaqsTab />}
     </div>
   );
 }
@@ -202,22 +215,28 @@ function ArticlesTab() {
         emptyTitle="No articles yet"
         rowActions={(row) => (
           <>
-            <button onClick={() => setViewingId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View article">
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit article"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete article">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View article" side="top">
+              <button onClick={() => setViewingId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View article">
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit article" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit article"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete article" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete article">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -343,19 +362,23 @@ function PagesTab() {
         emptyTitle="No static pages yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit page"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete page">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Edit page" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit page"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete page" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete page">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -467,29 +490,35 @@ function BannersTab() {
         emptyTitle="No banners yet"
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => {
-                setEditing(row);
-                setFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit banner"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggle(row)}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                row.active ? "hover:text-danger" : "hover:text-success"
-              )}
-              aria-label={row.active ? "Deactivate banner" : "Activate banner"}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete banner">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Edit banner" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit banner"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.active ? "Deactivate banner" : "Activate banner"} side="top">
+              <button
+                onClick={() => handleToggle(row)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                  row.active ? "hover:text-danger" : "hover:text-success"
+                )}
+                aria-label={row.active ? "Deactivate banner" : "Activate banner"}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete banner" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete banner">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -502,6 +531,136 @@ function BannersTab() {
         onConfirm={handleDelete}
         title={`Delete "${deleteTarget?.title}"?`}
         description="This will permanently remove the banner slot."
+        confirmLabel="Delete"
+      />
+    </div>
+  );
+}
+
+function FaqsTab() {
+  const dispatch = useAppDispatch();
+  const items = useAppSelector((state) => state.cms.faqs);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  // Grouped by category (site display order), then by the FAQ's own order within it.
+  const sorted = [...items].sort((a, b) => a.category.localeCompare(b.category) || a.order - b.order);
+
+  function handleSubmit(values) {
+    setBusy(true);
+    setTimeout(() => {
+      if (editing) {
+        dispatch(updateFaq({ id: editing.id, ...values }));
+        toast.success("FAQ updated");
+      } else {
+        const newId = `FAQ-${Math.floor(100 + Math.random() * 899)}`;
+        dispatch(addFaq({ id: newId, ...values }));
+        toast.success("FAQ added");
+      }
+      setBusy(false);
+      setFormOpen(false);
+      setEditing(null);
+    }, 400);
+  }
+
+  function handleDelete() {
+    dispatch(removeFaq(deleteTarget.id));
+    toast.success("FAQ deleted");
+    setDeleteTarget(null);
+  }
+
+  function handleBulkDelete() {
+    dispatch(removeFaqs(selectedIds));
+    toast.success(`${selectedIds.length} FAQs deleted`);
+    setSelectedIds([]);
+  }
+
+  const columns = [
+    {
+      key: "question",
+      header: "Question",
+      sortable: true,
+      render: (row) => <p className="max-w-[360px] truncate font-medium text-gray-900 dark:text-gray-100">{row.question}</p>,
+    },
+    { key: "category", header: "Category", sortable: true, render: (row) => <Badge variant="neutral">{row.category}</Badge> },
+    { key: "order", header: "Order", sortable: true, searchable: false },
+    {
+      key: "status",
+      header: "Status",
+      sortable: true,
+      render: (row) => {
+        const s = FAQ_STATUS_BADGE[row.status] ?? FAQ_STATUS_BADGE.draft;
+        return <Badge variant={s.variant}>{s.label}</Badge>;
+      },
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 rounded-lg bg-primary-50 px-3 py-2 dark:bg-primary-500/10">
+              <span className="text-xs font-medium text-primary-700 dark:text-primary-300">{selectedIds.length} selected</span>
+              <Button size="sm" variant="outline" icon={Trash2} onClick={handleBulkDelete}>
+                Delete
+              </Button>
+            </div>
+          )}
+        </div>
+        <Button
+          icon={Plus}
+          onClick={() => {
+            setEditing(null);
+            setFormOpen(true);
+          }}
+        >
+          Add FAQ
+        </Button>
+      </div>
+
+      <Table
+        columns={columns}
+        data={sorted}
+        selectable
+        selectedIds={selectedIds}
+        onSelectedIdsChange={setSelectedIds}
+        pageSize={10}
+        emptyTitle="No FAQs yet"
+        rowActions={(row) => (
+          <>
+            <Tooltip content="Edit FAQ" side="top">
+              <button
+                onClick={() => {
+                  setEditing(row);
+                  setFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit FAQ"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete FAQ" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete FAQ">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+          </>
+        )}
+      />
+
+      <FAQFormModal isOpen={formOpen} onClose={() => setFormOpen(false)} onSubmit={handleSubmit} initialData={editing} submitting={busy} />
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete this FAQ?"
+        description="This will permanently remove it from the public FAQ page."
         confirmLabel="Delete"
       />
     </div>

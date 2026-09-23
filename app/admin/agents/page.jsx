@@ -16,6 +16,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Tooltip from "@/components/ui/Tooltip";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -228,20 +229,24 @@ export default function AgentsPage() {
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openProfile(agent)}>
                   View Profile
                 </Button>
-                <button
-                  onClick={() => openEdit(agent)}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-                  aria-label={`Edit ${agent.name}`}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(agent)}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                  aria-label={`Remove ${agent.name}`}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip content={`Edit ${agent.name}`} side="top">
+                  <button
+                    onClick={() => openEdit(agent)}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                    aria-label={`Edit ${agent.name}`}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+                <Tooltip content={`Remove ${agent.name}`} side="top">
+                  <button
+                    onClick={() => setDeleteTarget(agent)}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                    aria-label={`Remove ${agent.name}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               </div>
             </Card>
           ))}

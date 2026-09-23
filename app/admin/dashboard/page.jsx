@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import Image from "next/image";
+import UiTooltip from "@/components/ui/Tooltip";
 import {
   AlertTriangle,
   ArrowRight,
@@ -891,12 +892,14 @@ export default function DashboardPage() {
                     {featured.status}
                   </Badge>
                 </div>
-                <button
-                  aria-label="Save to favorites"
-                  className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 backdrop-blur-sm transition-colors hover:text-danger"
-                >
-                  <Heart className="h-4 w-4" />
-                </button>
+                <UiTooltip content="Save to favorites" side="top">
+                  <button
+                    aria-label="Save to favorites"
+                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-gray-500 backdrop-blur-sm transition-colors hover:text-danger"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </button>
+                </UiTooltip>
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <p className="text-base font-semibold">{featured.title}</p>
                   <p className="mt-0.5 flex items-center gap-1 text-xs text-white/80">
@@ -968,12 +971,14 @@ export default function DashboardPage() {
                   >
                     {l.status}
                   </Badge>
-                  <button
-                    aria-label="Save to favorites"
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-gray-500 backdrop-blur-sm transition-colors hover:text-danger"
-                  >
-                    <Heart className="h-3.5 w-3.5" />
-                  </button>
+                  <UiTooltip content="Save to favorites" side="top">
+                    <button
+                      aria-label="Save to favorites"
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-gray-500 backdrop-blur-sm transition-colors hover:text-danger"
+                    >
+                      <Heart className="h-3.5 w-3.5" />
+                    </button>
+                  </UiTooltip>
                 </div>
                 <div className="p-3.5">
                   <div className="flex items-start justify-between gap-2">
@@ -1069,20 +1074,24 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {formatINR(l.price)}
                   </span>
-                  <button
-                    onClick={() => handleQuickApprove(l)}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                    aria-label="Approve listing"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleQuickReject(l)}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                    aria-label="Reject listing"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+                  <UiTooltip content="Approve listing" side="top">
+                    <button
+                      onClick={() => handleQuickApprove(l)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                      aria-label="Approve listing"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                  </UiTooltip>
+                  <UiTooltip content="Reject listing" side="top">
+                    <button
+                      onClick={() => handleQuickReject(l)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                      aria-label="Reject listing"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </UiTooltip>
                 </div>
               </div>
             ))}

@@ -101,10 +101,22 @@ const initialBanners = [
   { id: "BNR-005", title: "Refer & Earn Program", imageLabel: "400x600 sidebar image", linkUrl: "/refer", position: "Listing Sidebar", startDate: "2026-09-10", endDate: "2026-10-10", active: true, clicks: 560 },
 ];
 
+const initialFaqs = [
+  { id: "FAQ-001", question: "How do I list my property on the platform?", answer: "Sign up as an Owner, Agent, Dealer or Builder, then use the Add Listing form to submit your property. Every listing goes through admin review before it goes live.", category: "Listings", order: 1, status: "published" },
+  { id: "FAQ-002", question: "How long does listing verification take?", answer: "Most listings are reviewed within 24-48 hours. You'll be notified once it's approved, rejected or flagged for more information.", category: "Listings", order: 2, status: "published" },
+  { id: "FAQ-003", question: "What is a RERA registration number and why is it required?", answer: "RERA (Real Estate Regulatory Authority) registration is a legal requirement for most under-construction and commercial projects in India. Agents, dealers and builders must provide a valid RERA number to get the verified badge.", category: "Verification", order: 1, status: "published" },
+  { id: "FAQ-004", question: "How do I get verified as an Agent, Dealer or Builder?", answer: "Submit your agency name and RERA registration number from your profile. Our team cross-checks these details before granting the verified badge.", category: "Verification", order: 2, status: "published" },
+  { id: "FAQ-005", question: "What payment plans are available for featured listings?", answer: "Check the Pricing Plans section for current tiers — each includes a set number of listings and featured credits per billing cycle.", category: "Payments", order: 1, status: "published" },
+  { id: "FAQ-006", question: "Can I get a refund on a subscription?", answer: "Refunds are evaluated case by case from the Payments > Transactions screen. Contact support with your transaction ID.", category: "Payments", order: 2, status: "published" },
+  { id: "FAQ-007", question: "How do I schedule a site visit?", answer: "Open any approved listing and use the Site Visits module to book a walkthrough with the assigned agent — you'll get a confirmation once the slot is accepted.", category: "Site Visits", order: 1, status: "published" },
+  { id: "FAQ-008", question: "How do I report a suspicious or fake listing?", answer: "Use the Flag option on the listing's detail page. Our moderation team reviews flagged listings and removes confirmed fakes within 48 hours.", category: "Trust & Safety", order: 1, status: "draft" },
+];
+
 const initialState = {
   articles: initialArticles,
   staticPages: initialStaticPages,
   banners: initialBanners,
+  faqs: initialFaqs,
   filters: { category: "all", status: "all" },
 };
 
@@ -155,6 +167,21 @@ const cmsSlice = createSlice({
     removeBanner(state, action) {
       state.banners = state.banners.filter((b) => b.id !== action.payload);
     },
+
+    addFaq(state, action) {
+      state.faqs.push(action.payload);
+    },
+    updateFaq(state, action) {
+      const i = state.faqs.findIndex((f) => f.id === action.payload.id);
+      if (i !== -1) state.faqs[i] = { ...state.faqs[i], ...action.payload };
+    },
+    removeFaq(state, action) {
+      state.faqs = state.faqs.filter((f) => f.id !== action.payload);
+    },
+    removeFaqs(state, action) {
+      const ids = new Set(action.payload);
+      state.faqs = state.faqs.filter((f) => !ids.has(f.id));
+    },
   },
 });
 
@@ -171,6 +198,10 @@ export const {
   addBanner,
   updateBanner,
   removeBanner,
+  addFaq,
+  updateFaq,
+  removeFaq,
+  removeFaqs,
 } = cmsSlice.actions;
 
 export default cmsSlice.reducer;

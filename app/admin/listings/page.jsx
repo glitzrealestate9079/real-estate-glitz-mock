@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
+  AlertTriangle,
   Building2,
   Check,
   Eye,
@@ -21,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Tooltip from "@/components/ui/Tooltip";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -29,18 +32,17 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ReasonModal from "@/components/ui/ReasonModal";
-import ListingFormModal from "@/components/listings/ListingFormModal";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { useQuickAddParam } from "@/hooks/useQuickAddParam";
 import {
-  addListing,
   removeListing,
   removeListings,
   updateListing,
   updateListingStatus,
   updateListingsStatus,
 } from "@/redux/slices/listingsSlice";
-import { cityOf, formatCount, formatINR, toLocalISODate, todayISO } from "@/utils/format";
+import { cityOf, formatCount, formatINR, toLocalISODate } from "@/utils/format";
+import { daysSincePosted, isStaleListing } from "@/lib/listingFreshness";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 const TYPE_ICON = { Apartment: Building2, Villa: Home, Plot: Landmark, Commercial: Store, PG: Users2 };
 
@@ -58,6 +60,8 @@ function priceLabel(listing) {
 
 export default function ListingsPage() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const logAction = useAuditLog();
   const items = useAppSelector((state) => state.listings.items);
 
   const [statusFilter, setStatusFilter] = useState("all");
@@ -67,13 +71,10 @@ export default function ListingsPage() {
   const [verificationFilter, setVerificationFilter] = useState("all");
   const [selectedIds, setSelectedIds] = useState([]);
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingListing, setEditingListing] = useState(null);
   const [viewingId, setViewingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [rejectTarget, setRejectTarget] = useState(null);
   const [bulkRejectOpen, setBulkRejectOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   const cities = useMemo(() => [...new Set(items.map((l) => cityOf(l.city)))].sort(), [items]);
 
@@ -92,50 +93,15 @@ export default function ListingsPage() {
   // Renew/Force-Verify RERA update the badge in place instead of showing stale data.
   const viewingListing = useMemo(() => items.find((l) => l.id === viewingId) ?? null, [items, viewingId]);
 
-  function openAdd() {
-    setEditingListing(null);
-    setFormOpen(true);
-  }
-
-  useQuickAddParam(openAdd);
-
-  function openEdit(listing) {
-    setEditingListing(listing);
-    setFormOpen(true);
-  }
-
-  function handleFormSubmit(values) {
-    setBusy(true);
-    setTimeout(() => {
-      if (editingListing) {
-        dispatch(updateListing({ id: editingListing.id, ...values }));
-        toast.success(`${values.title} updated`);
-      } else {
-        const newId = `PRP-${Math.floor(10000 + Math.random() * 89999)}`;
-        dispatch(
-          addListing({
-            id: newId,
-            ...values,
-            status: "pending",
-            submittedDate: todayISO(),
-            admin: { duplicateCheck: "passed", phoneVerified: false },
-          })
-        );
-        toast.success(`${values.title} submitted for review`);
-      }
-      setBusy(false);
-      setFormOpen(false);
-      setEditingListing(null);
-    }, 400);
-  }
-
   function handleApprove(listing) {
     dispatch(updateListingStatus({ id: listing.id, status: "approved" }));
+    logAction(`Approved listing ${listing.id}`, "Listings");
     toast.success(`${listing.id} approved`);
   }
 
   function handleReject(reason) {
     dispatch(updateListingStatus({ id: rejectTarget.id, status: "rejected", rejectionReason: reason }));
+    logAction(`Rejected listing ${rejectTarget.id}`, "Listings");
     toast.success(`${rejectTarget.id} rejected`);
     setRejectTarget(null);
   }
@@ -153,20 +119,28 @@ export default function ListingsPage() {
     toast.success(`${listing.id} renewed until ${expiryDate}`);
   }
 
+  function handleConfirmAvailable(listing) {
+    dispatch(updateListing({ id: listing.id, lastConfirmedDate: toLocalISODate(new Date()) }));
+    toast.success(`${listing.id} marked as still available`);
+  }
+
   function handleDelete() {
     dispatch(removeListing(deleteTarget.id));
+    logAction(`Deleted listing ${deleteTarget.id}`, "Listings");
     toast.success(`${deleteTarget.id} deleted`);
     setDeleteTarget(null);
   }
 
   function handleBulkApprove() {
     dispatch(updateListingsStatus({ ids: selectedIds, status: "approved" }));
+    logAction(`Bulk-approved ${selectedIds.length} listings`, "Listings");
     toast.success(`${selectedIds.length} listings approved`);
     setSelectedIds([]);
   }
 
   function handleBulkReject(reason) {
     dispatch(updateListingsStatus({ ids: selectedIds, status: "rejected", rejectionReason: reason }));
+    logAction(`Bulk-rejected ${selectedIds.length} listings`, "Listings");
     toast.success(`${selectedIds.length} listings rejected`);
     setSelectedIds([]);
     setBulkRejectOpen(false);
@@ -174,6 +148,7 @@ export default function ListingsPage() {
 
   function handleBulkDelete() {
     dispatch(removeListings(selectedIds));
+    logAction(`Bulk-deleted ${selectedIds.length} listings`, "Listings");
     toast.success(`${selectedIds.length} listings deleted`);
     setSelectedIds([]);
   }
@@ -239,7 +214,22 @@ export default function ListingsPage() {
         return <Badge variant={s.variant}>{s.label}</Badge>;
       },
     },
-    { key: "submittedDate", header: "Submitted", sortable: true },
+    {
+      key: "submittedDate",
+      header: "Submitted",
+      sortable: true,
+      render: (row) =>
+        isStaleListing(row) ? (
+          <Tooltip content={`No availability confirmation in ${daysSincePosted(row)} days`} side="top">
+            <span className="inline-flex items-center gap-1 text-warning">
+              {row.submittedDate}
+              <AlertTriangle className="h-3.5 w-3.5" />
+            </span>
+          </Tooltip>
+        ) : (
+          row.submittedDate
+        ),
+    },
   ];
 
   return (
@@ -251,7 +241,7 @@ export default function ListingsPage() {
             Review, approve, reject and manage property listings across all types.
           </p>
         </div>
-        <Button icon={Plus} onClick={openAdd}>
+        <Button icon={Plus} onClick={() => router.push("/admin/listings/new")}>
           Add Listing
         </Button>
       </div>
@@ -352,55 +342,57 @@ export default function ListingsPage() {
         emptyDescription="Try a different status, type, location or verification filter."
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => setViewingId(row.id)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              aria-label="View listing"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit listing"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View listing" side="top">
+              <button
+                onClick={() => setViewingId(row.id)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
+                aria-label="View listing"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit listing" side="top">
+              <button
+                onClick={() => router.push(`/admin/listings/${row.id}/edit`)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit listing"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
             {row.status === "pending" || row.status === "flagged" ? (
               <>
-                <button
-                  onClick={() => handleApprove(row)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                  aria-label="Approve listing"
-                >
-                  <Check className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => setRejectTarget(row)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                  aria-label="Reject listing"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip content="Approve listing" side="top">
+                  <button
+                    onClick={() => handleApprove(row)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                    aria-label="Approve listing"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Reject listing" side="top">
+                  <button
+                    onClick={() => setRejectTarget(row)}
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                    aria-label="Reject listing"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               </>
             ) : null}
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete listing"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete listing" side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete listing"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
-      />
-
-      <ListingFormModal
-        isOpen={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSubmit={handleFormSubmit}
-        initialData={editingListing}
-        submitting={busy}
       />
 
       <ConfirmDialog
@@ -444,6 +436,11 @@ export default function ListingsPage() {
               <Button variant="outline" icon={RefreshCw} onClick={() => handleRenew(viewingListing)}>
                 Renew +30d
               </Button>
+              {isStaleListing(viewingListing) && (
+                <Button variant="outline" icon={Check} onClick={() => handleConfirmAvailable(viewingListing)}>
+                  Mark Still Available
+                </Button>
+              )}
               <Button
                 variant="outline"
                 icon={viewingListing.reraVerified ? ShieldOff : ShieldCheck}
@@ -502,6 +499,14 @@ export default function ListingsPage() {
               <InfoField label="Expires" value={viewingListing.expiryDate} />
               <InfoField label="Auto-Renew" value={<Badge variant={viewingListing.autoRenew ? "success" : "neutral"}>{viewingListing.autoRenew ? "On" : "Off"}</Badge>} />
               <InfoField label="RERA Badge" value={<Badge variant={viewingListing.reraVerified ? "success" : "neutral"}>{viewingListing.reraVerified ? "Verified" : "Not Verified"}</Badge>} />
+              <InfoField
+                label="Availability Confirmed"
+                value={
+                  <Badge variant={isStaleListing(viewingListing) ? "warning" : "success"}>
+                    {daysSincePosted(viewingListing)}d ago{isStaleListing(viewingListing) ? " — stale" : ""}
+                  </Badge>
+                }
+              />
             </div>
 
             {viewingListing.rejectionReason && (

@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { AlertTriangle } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
 import { useAppSelector } from "@/hooks/useReduxHooks";
+
+// A visit still holds its slot unless it's been called off — completed ones stay booked too
+// (the agent was there), only a cancelled visit frees the slot back up.
+const NON_BLOCKING_STATUSES = new Set(["cancelled"]);
 
 const STATUSES = ["requested", "confirmed", "rescheduled", "completed", "cancelled"];
 
@@ -46,6 +51,7 @@ export default function SiteVisitFormModal({ isOpen, onClose, onSubmit, initialD
   const isEdit = Boolean(initialData);
   const listings = useAppSelector((state) => state.listings.items);
   const users = useAppSelector((state) => state.users.items);
+  const siteVisits = useAppSelector((state) => state.siteVisits.items);
   const {
     register,
     handleSubmit,
@@ -56,6 +62,25 @@ export default function SiteVisitFormModal({ isOpen, onClose, onSubmit, initialD
   } = useForm({ resolver: yupResolver(schema), defaultValues: DEFAULT_VALUES });
 
   const listingId = watch("listingId");
+  const agentId = watch("agentId");
+  const date = watch("date");
+  const time = watch("time");
+
+  // Same agent, same date, same time slot (exact string match — visit times are freeform like
+  // "11:00 AM", not a structured field) and not already cancelled = double-booked.
+  const conflictingVisit = useMemo(() => {
+    if (!agentId || !date || !time?.trim()) return null;
+    return (
+      siteVisits.find(
+        (v) =>
+          v.id !== initialData?.id &&
+          v.agentId === agentId &&
+          v.date === date &&
+          v.time.trim().toLowerCase() === time.trim().toLowerCase() &&
+          !NON_BLOCKING_STATUSES.has(v.status)
+      ) ?? null
+    );
+  }, [siteVisits, agentId, date, time, initialData?.id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -160,6 +185,16 @@ export default function SiteVisitFormModal({ isOpen, onClose, onSubmit, initialD
             ))}
           </Select>
         </div>
+
+        {conflictingVisit && (
+          <div className="flex items-start gap-2 rounded-lg bg-warning/10 p-3 text-sm text-warning">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              This agent already has {conflictingVisit.id} booked for {conflictingVisit.date} at {conflictingVisit.time}
+              {" "}({conflictingVisit.buyerName}). This won&apos;t block scheduling — double-check before confirming.
+            </p>
+          </div>
+        )}
 
         <Textarea
           label="Notes (optional)"

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  BellRing,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -26,6 +27,7 @@ import Select from "@/components/ui/Select";
 import Modal from "@/components/ui/Modal";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Tooltip from "@/components/ui/Tooltip";
 import LeadFormModal, { STATUSES, STATUS_LABELS } from "@/components/leads/LeadFormModal";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { useQuickAddParam } from "@/hooks/useQuickAddParam";
@@ -63,12 +65,12 @@ const FLAG_BADGE = {
 };
 
 function exportCSV(rows) {
-  const headers = ["ID", "Buyer Name", "Phone", "Email", "Budget", "Listing ID", "Listing Title", "Channel", "Status", "Flag", "Assigned To", "Created"];
+  const headers = ["ID", "Buyer Name", "Phone", "Email", "Budget", "Listing ID", "Listing Title", "Channel", "Status", "Flag", "Assigned To", "Created", "Next Follow-up"];
   const csvRow = (vals) => vals.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",");
   const lines = [csvRow(headers)];
   rows.forEach((r) => {
     lines.push(
-      csvRow([r.id, r.buyerName, r.buyerPhone, r.buyerEmail, r.budget, r.listingId, r.listingTitle, r.channel, r.status, r.flag, r.assignedTo, r.createdDate])
+      csvRow([r.id, r.buyerName, r.buyerPhone, r.buyerEmail, r.budget, r.listingId, r.listingTitle, r.channel, r.status, r.flag, r.assignedTo, r.createdDate, r.nextFollowUpDate])
     );
   });
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -250,6 +252,21 @@ export default function LeadsPage() {
     },
     { key: "assignedTo", header: "Assigned To" },
     { key: "createdDate", header: "Created", sortable: true },
+    {
+      key: "nextFollowUpDate",
+      header: "Next Follow-up",
+      sortable: true,
+      render: (row) => {
+        if (!row.nextFollowUpDate) return <span className="text-gray-400">—</span>;
+        const overdue = row.nextFollowUpDate < todayISO() && !["converted", "lost"].includes(row.status);
+        return (
+          <span className={overdue ? "inline-flex items-center gap-1 font-medium text-danger" : "text-gray-700 dark:text-gray-300"}>
+            {overdue && <BellRing className="h-3.5 w-3.5" />}
+            {row.nextFollowUpDate}
+          </span>
+        );
+      },
+    },
   ];
 
   return (
@@ -369,22 +386,26 @@ export default function LeadsPage() {
                           <div className="mt-2 flex items-center justify-between">
                             <span className="text-[11px] text-gray-400">{lead.assignedTo}</span>
                             <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => handleMoveStage(lead, -1)}
-                                disabled={stageIndex === 0}
-                                className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
-                                aria-label="Move to previous stage"
-                              >
-                                <ChevronLeft className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                onClick={() => handleMoveStage(lead, 1)}
-                                disabled={stageIndex === STATUSES.length - 1}
-                                className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
-                                aria-label="Move to next stage"
-                              >
-                                <ChevronRight className="h-3.5 w-3.5" />
-                              </button>
+                              <Tooltip content="Move to previous stage" side="top">
+                                <button
+                                  onClick={() => handleMoveStage(lead, -1)}
+                                  disabled={stageIndex === 0}
+                                  className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+                                  aria-label="Move to previous stage"
+                                >
+                                  <ChevronLeft className="h-3.5 w-3.5" />
+                                </button>
+                              </Tooltip>
+                              <Tooltip content="Move to next stage" side="top">
+                                <button
+                                  onClick={() => handleMoveStage(lead, 1)}
+                                  disabled={stageIndex === STATUSES.length - 1}
+                                  className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 disabled:opacity-30 dark:hover:bg-gray-800"
+                                  aria-label="Move to next stage"
+                                >
+                                  <ChevronRight className="h-3.5 w-3.5" />
+                                </button>
+                              </Tooltip>
                             </div>
                           </div>
                         </Card>
@@ -409,45 +430,55 @@ export default function LeadsPage() {
         emptyDescription="Try a different channel, status or flag."
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => setViewingLead(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              aria-label="View lead"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit lead"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.flag !== "genuine" && (
+            <Tooltip content="View lead" side="top">
               <button
-                onClick={() => handleMarkGenuine(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                aria-label="Mark genuine"
+                onClick={() => setViewingLead(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
+                aria-label="View lead"
               >
-                <CheckCircle2 className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            <Tooltip content="Edit lead" side="top">
+              <button
+                onClick={() => openEdit(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit lead"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            {row.flag !== "genuine" && (
+              <Tooltip content="Mark genuine" side="top">
+                <button
+                  onClick={() => handleMarkGenuine(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                  aria-label="Mark genuine"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
             {row.flag !== "spam" && (
-              <button
-                onClick={() => handleMarkSpam(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                aria-label="Mark spam"
-              >
-                <ShieldAlert className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Mark spam" side="top">
+                <button
+                  onClick={() => handleMarkSpam(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                  aria-label="Mark spam"
+                >
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete lead"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete lead" side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete lead"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -517,6 +548,7 @@ export default function LeadsPage() {
               <InfoField label="Listing" value={`${viewingLead.listingTitle} (${viewingLead.listingId})`} />
               <InfoField label="Created" value={viewingLead.createdDate} />
               <InfoField label="Last Activity" value={viewingLead.lastActivity} />
+              <InfoField label="Next Follow-up" value={viewingLead.nextFollowUpDate || "—"} />
               <InfoField
                 label="Status"
                 value={<Badge variant={STATUS_BADGE[viewingLead.status]?.variant}>{STATUS_BADGE[viewingLead.status]?.label}</Badge>}

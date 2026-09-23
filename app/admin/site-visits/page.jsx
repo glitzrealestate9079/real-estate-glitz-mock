@@ -28,6 +28,7 @@ import SegmentedControl from "@/components/ui/SegmentedControl";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ReasonModal from "@/components/ui/ReasonModal";
 import SiteVisitFormModal from "@/components/site-visits/SiteVisitFormModal";
+import Tooltip from "@/components/ui/Tooltip";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { useQuickAddParam } from "@/hooks/useQuickAddParam";
 import {
@@ -395,54 +396,66 @@ export default function SiteVisitsPage() {
         emptyDescription="Try a different status or agent."
         rowActions={(row) => (
           <>
-            <button
-              onClick={() => setViewingId(row.id)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              aria-label="View visit"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => openEdit(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit visit"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            {row.status === "requested" && (
+            <Tooltip content="View visit" side="top">
               <button
-                onClick={() => handleConfirm(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                aria-label="Confirm visit"
+                onClick={() => setViewingId(row.id)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
+                aria-label="View visit"
               >
-                <Check className="h-3.5 w-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </button>
+            </Tooltip>
+            <Tooltip content="Edit visit" side="top">
+              <button
+                onClick={() => openEdit(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit visit"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            {row.status === "requested" && (
+              <Tooltip content="Confirm visit" side="top">
+                <button
+                  onClick={() => handleConfirm(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                  aria-label="Confirm visit"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
             {(row.status === "confirmed" || row.status === "rescheduled") && (
-              <button
-                onClick={() => handleComplete(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                aria-label="Mark completed"
-              >
-                <CalendarCheck2 className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Mark completed" side="top">
+                <button
+                  onClick={() => handleComplete(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                  aria-label="Mark completed"
+                >
+                  <CalendarCheck2 className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
             {(row.status === "requested" || row.status === "confirmed" || row.status === "rescheduled") && (
-              <button
-                onClick={() => setCancelTarget(row)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                aria-label="Cancel visit"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip content="Cancel visit" side="top">
+                <button
+                  onClick={() => setCancelTarget(row)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                  aria-label="Cancel visit"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             )}
-            <button
-              onClick={() => setDeleteTarget(row)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-              aria-label="Delete visit"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="Delete visit" side="top">
+              <button
+                onClick={() => setDeleteTarget(row)}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                aria-label="Delete visit"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />

@@ -23,6 +23,7 @@ import {
 import toast from "react-hot-toast";
 import { cn } from "@/utils/cn";
 import Card from "@/components/ui/Card";
+import Tooltip from "@/components/ui/Tooltip";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Table from "@/components/ui/Table";
@@ -37,6 +38,7 @@ import ProjectFormModal from "@/components/builders/ProjectFormModal";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addBuilder, removeBuilder, removeBuilders, updateBuilder } from "@/redux/slices/buildersSlice";
 import { formatCount } from "@/utils/format";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 const LIVE_PROJECT_STATUSES = ["approved", "under_construction", "completed"];
 
@@ -57,6 +59,7 @@ const PROJECT_STATUS_BADGE = {
 
 export default function BuildersPage() {
   const dispatch = useAppDispatch();
+  const logAction = useAuditLog();
   const items = useAppSelector((state) => state.builders.items);
   const leads = useAppSelector((state) => state.leads.items);
 
@@ -139,6 +142,7 @@ export default function BuildersPage() {
   function handleToggleBuilderStatus(builder) {
     const next = builder.status === "active" ? "suspended" : "active";
     dispatch(updateBuilder({ id: builder.id, status: next }));
+    logAction(`${next === "active" ? "Activated" : "Suspended"} builder ${builder.name}`, "Builders");
     toast.success(`${builder.name} ${next === "active" ? "activated" : "suspended"}`);
   }
 
@@ -192,6 +196,7 @@ export default function BuildersPage() {
   function handleApproveProject(builder, project) {
     const newProjects = builder.projects.map((p) => (p.id === project.id ? { ...p, status: "approved" } : p));
     dispatch(updateBuilder({ id: builder.id, projects: newProjects }));
+    logAction(`Approved project ${project.name} (${builder.name})`, "Builders");
     toast.success(`${project.name} approved for launch`);
   }
 
@@ -199,6 +204,7 @@ export default function BuildersPage() {
     const { builder, project } = rejectProjectTarget;
     const newProjects = builder.projects.map((p) => (p.id === project.id ? { ...p, status: "rejected", rejectionReason: reason } : p));
     dispatch(updateBuilder({ id: builder.id, projects: newProjects }));
+    logAction(`Rejected project ${project.name} (${builder.name})`, "Builders");
     toast.success(`${project.name} rejected`);
     setRejectProjectTarget(null);
   }
@@ -301,28 +307,38 @@ export default function BuildersPage() {
         emptyTitle="No builders match this filter"
         rowActions={(row) => (
           <>
-            <button onClick={() => setViewingBuilderId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View builder">
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => openEditBuilder(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit builder">
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => openAddProject(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Add project">
-              <FolderPlus className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => handleToggleBuilderStatus(row)}
-              className={cn(
-                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
-                row.status === "active" ? "hover:text-danger" : "hover:text-success"
-              )}
-              aria-label={row.status === "active" ? "Suspend builder" : "Activate builder"}
-            >
-              <Power className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete builder">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View builder" side="top">
+              <button onClick={() => setViewingBuilderId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View builder">
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit builder" side="top">
+              <button onClick={() => openEditBuilder(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit builder">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Add project" side="top">
+              <button onClick={() => openAddProject(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Add project">
+                <FolderPlus className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content={row.status === "active" ? "Suspend builder" : "Activate builder"} side="top">
+              <button
+                onClick={() => handleToggleBuilderStatus(row)}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800",
+                  row.status === "active" ? "hover:text-danger" : "hover:text-success"
+                )}
+                aria-label={row.status === "active" ? "Suspend builder" : "Activate builder"}
+              >
+                <Power className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete builder" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete builder">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -451,40 +467,48 @@ export default function BuildersPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Badge variant={s.variant}>{s.label}</Badge>
-                            <button onClick={() => openEditProject(viewingBuilder, project)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit project">
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
+                            <Tooltip content="Edit project" side="top">
+                              <button onClick={() => openEditProject(viewingBuilder, project)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit project">
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                            </Tooltip>
                             {project.status === "pending_approval" && (
                               <>
-                                <button
-                                  onClick={() => handleApproveProject(viewingBuilder, project)}
-                                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
-                                  aria-label="Approve project"
-                                >
-                                  <Check className="h-3.5 w-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setRejectProjectTarget({ builder: viewingBuilder, project });
-                                    setViewingBuilderId(null);
-                                  }}
-                                  className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                                  aria-label="Reject project"
-                                >
-                                  <X className="h-3.5 w-3.5" />
-                                </button>
+                                <Tooltip content="Approve project" side="top">
+                                  <button
+                                    onClick={() => handleApproveProject(viewingBuilder, project)}
+                                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-success/10 hover:text-success"
+                                    aria-label="Approve project"
+                                  >
+                                    <Check className="h-3.5 w-3.5" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip content="Reject project" side="top">
+                                  <button
+                                    onClick={() => {
+                                      setRejectProjectTarget({ builder: viewingBuilder, project });
+                                      setViewingBuilderId(null);
+                                    }}
+                                    className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                                    aria-label="Reject project"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </Tooltip>
                               </>
                             )}
-                            <button
-                              onClick={() => {
-                                setDeleteProjectTarget({ builder: viewingBuilder, project });
-                                setViewingBuilderId(null);
-                              }}
-                              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                              aria-label="Delete project"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                            <Tooltip content="Delete project" side="top">
+                              <button
+                                onClick={() => {
+                                  setDeleteProjectTarget({ builder: viewingBuilder, project });
+                                  setViewingBuilderId(null);
+                                }}
+                                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                                aria-label="Delete project"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </Tooltip>
                           </div>
                         </div>
 

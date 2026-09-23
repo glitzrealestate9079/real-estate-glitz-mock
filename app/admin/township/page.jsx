@@ -28,6 +28,7 @@ import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Tooltip from "@/components/ui/Tooltip";
 import TownshipFormModal from "@/components/township/TownshipFormModal";
 import PhaseFormModal from "@/components/township/PhaseFormModal";
 import ConversionRatesFormModal from "@/components/township/ConversionRatesFormModal";
@@ -285,25 +286,33 @@ function TownshipsTab() {
         emptyTitle="No townships yet"
         rowActions={(row) => (
           <>
-            <button onClick={() => setViewingId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View township">
-              <Eye className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => {
-                setEditingTownship(row);
-                setTownshipFormOpen(true);
-              }}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
-              aria-label="Edit township"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => openAddPhase(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Link phase">
-              <FolderPlus className="h-3.5 w-3.5" />
-            </button>
-            <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete township">
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <Tooltip content="View township" side="top">
+              <button onClick={() => setViewingId(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800" aria-label="View township">
+                <Eye className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Edit township" side="top">
+              <button
+                onClick={() => {
+                  setEditingTownship(row);
+                  setTownshipFormOpen(true);
+                }}
+                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800"
+                aria-label="Edit township"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Link phase" side="top">
+              <button onClick={() => openAddPhase(row.id)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-primary-50 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Link phase">
+                <FolderPlus className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
+            <Tooltip content="Delete township" side="top">
+              <button onClick={() => setDeleteTarget(row)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger" aria-label="Delete township">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </Tooltip>
           </>
         )}
       />
@@ -388,45 +397,55 @@ function TownshipsTab() {
                         </div>
                         <div className="flex items-center gap-1">
                           <Badge variant={s.variant}>{s.label}</Badge>
-                          <button
-                            onClick={() => handleMovePhase(viewing, index, -1)}
-                            disabled={index === 0}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 disabled:opacity-30 dark:hover:bg-gray-800"
-                            aria-label="Move phase up"
-                          >
-                            <ArrowUp className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleMovePhase(viewing, index, 1)}
-                            disabled={index === viewing.phases.length - 1}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 disabled:opacity-30 dark:hover:bg-gray-800"
-                            aria-label="Move phase down"
-                          >
-                            <ArrowDown className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleToggleFeature(viewing, phase)}
-                            className={cn(
-                              "flex h-7 w-7 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-800",
-                              phase.featured ? "text-amber-400" : "text-gray-400 hover:text-amber-400"
-                            )}
-                            aria-label={phase.featured ? "Unfeature phase" : "Feature phase"}
-                          >
-                            <Star className={cn("h-3.5 w-3.5", phase.featured && "fill-amber-400")} />
-                          </button>
-                          <button onClick={() => openEditPhase(viewing, phase)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit phase">
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeletePhaseTarget({ township: viewing, phase });
-                              setViewingId(null);
-                            }}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
-                            aria-label="Unlink phase"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          <Tooltip content="Move phase up" side="top">
+                            <button
+                              onClick={() => handleMovePhase(viewing, index, -1)}
+                              disabled={index === 0}
+                              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 disabled:opacity-30 dark:hover:bg-gray-800"
+                              aria-label="Move phase up"
+                            >
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip content="Move phase down" side="top">
+                            <button
+                              onClick={() => handleMovePhase(viewing, index, 1)}
+                              disabled={index === viewing.phases.length - 1}
+                              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 disabled:opacity-30 dark:hover:bg-gray-800"
+                              aria-label="Move phase down"
+                            >
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip content={phase.featured ? "Unfeature phase" : "Feature phase"} side="top">
+                            <button
+                              onClick={() => handleToggleFeature(viewing, phase)}
+                              className={cn(
+                                "flex h-7 w-7 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-800",
+                                phase.featured ? "text-amber-400" : "text-gray-400 hover:text-amber-400"
+                              )}
+                              aria-label={phase.featured ? "Unfeature phase" : "Feature phase"}
+                            >
+                              <Star className={cn("h-3.5 w-3.5", phase.featured && "fill-amber-400")} />
+                            </button>
+                          </Tooltip>
+                          <Tooltip content="Edit phase" side="top">
+                            <button onClick={() => openEditPhase(viewing, phase)} className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800" aria-label="Edit phase">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                          <Tooltip content="Unlink phase" side="top">
+                            <button
+                              onClick={() => {
+                                setDeletePhaseTarget({ township: viewing, phase });
+                                setViewingId(null);
+                              }}
+                              className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-danger/10 hover:text-danger"
+                              aria-label="Unlink phase"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
                         </div>
                       </div>
                     );

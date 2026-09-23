@@ -28,6 +28,12 @@ export function todayISO() {
   return toLocalISODate(new Date());
 }
 
+/** "YYYY-MM-DD HH:MM" timestamp (local time) — the format every Audit Log entry is stamped with. */
+export function nowLogTimestamp() {
+  const d = new Date();
+  return `${toLocalISODate(d)} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 /** City strings across listings/leads are stored as "Locality, City" — this pulls just the city part. */
 export function cityOf(location) {
   const parts = (location ?? "").split(",");

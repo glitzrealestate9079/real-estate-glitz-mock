@@ -13,7 +13,7 @@ const ROLES = ["Buyer", "Owner", "Agent", "Dealer", "Builder"];
 const VERIFIED_ROLES = ["Agent", "Dealer", "Builder"];
 
 // `agencyName`/`reraNumber` only apply to Agent/Dealer/Builder — required only for those roles,
-// same when($role) resolver pattern used in ListingFormModal (reads the role straight off the
+// same when($role) resolver pattern used in ListingForm (reads the role straight off the
 // submitted values so it's always current, no stale-context pitfalls).
 const schema = yup.object({
   name: yup.string().trim().required("Name is required").min(3, "Name is too short"),
