@@ -465,9 +465,9 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening with your real estate platform today.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <SegmentedControl options={DATE_RANGES} value={dateRange} onChange={setDateRange} />
-          <Button icon={Plus} onClick={() => router.push("/admin/listings")}>
+        <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+          <SegmentedControl options={DATE_RANGES} value={dateRange} onChange={setDateRange} className="w-auto shrink-0" />
+          <Button icon={Plus} onClick={() => router.push("/admin/listings/new")} className="shrink-0">
             Add Listing
           </Button>
         </div>

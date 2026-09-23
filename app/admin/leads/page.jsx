@@ -278,12 +278,12 @@ export default function LeadsPage() {
             Central log of every buyer enquiry — call, chat, callback, contact form and WhatsApp.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <SegmentedControl options={VIEW_MODES} value={viewMode} onChange={setViewMode} />
-          <Button variant="outline" icon={Download} onClick={handleExport}>
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+          <SegmentedControl options={VIEW_MODES} value={viewMode} onChange={setViewMode} className="w-auto shrink-0" />
+          <Button variant="outline" icon={Download} onClick={handleExport} className="shrink-0">
             Export CSV
           </Button>
-          <Button icon={Plus} onClick={openAdd}>
+          <Button icon={Plus} onClick={openAdd} className="shrink-0">
             Add Lead
           </Button>
         </div>

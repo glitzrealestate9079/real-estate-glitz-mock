@@ -245,9 +245,9 @@ export default function SiteVisitsPage() {
             Schedule and track buyer/tenant walkthroughs across every listing.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <SegmentedControl options={VIEW_MODES} value={viewMode} onChange={setViewMode} />
-          <Button icon={Plus} onClick={openAdd}>
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+          <SegmentedControl options={VIEW_MODES} value={viewMode} onChange={setViewMode} className="w-auto shrink-0" />
+          <Button icon={Plus} onClick={openAdd} className="shrink-0">
             Schedule Visit
           </Button>
         </div>
