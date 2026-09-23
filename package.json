@@ -1,0 +1,36 @@
+{
+  "name": "real-estate-admin-panel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Admin panel for the AI-Powered Real Estate Marketplace (99acres/Housing.com-style platform) — frontend-only scaffold with dummy data.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@reduxjs/toolkit": "^2.2.7",
+    "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
+    "framer-motion": "^11.5.4",
+    "lucide-react": "^0.445.0",
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.4.1",
+    "react-redux": "^9.1.2",
+    "react-simple-maps": "^5.0.5",
+    "recharts": "^2.12.7",
+    "tailwind-merge": "^2.5.2",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
+    "yup": "^1.4.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10"
+  }
+}
